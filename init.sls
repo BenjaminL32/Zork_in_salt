@@ -17,7 +17,7 @@ zork_zip_extract:
 
 play_zork_script:
   file.managed:
-    - name: /home/vagrant/play_zork.sh
+    - name: /home/vagrant/zork_undiscovered/play_zork.sh
     - mode: '0755'
     - user: vagrant
     - group: vagrant
