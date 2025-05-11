@@ -10,8 +10,9 @@ sudo curl -o /srv/salt/init.sls https://raw.githubusercontent.com/BenjaminL32/Zo
 sudo mkdir -p /etc/apt/keyrings
 sudo curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | sudo tee /etc/apt/keyrings/salt-archive-keyring.pgp
 sudo curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources | sudo tee /etc/apt/sources.list.d/salt.sources
+sudo apt-get update
 sudo apt-get install -y salt-master
-sudo systemctl restart salt-master.service
+sudo systemctl restart salt-master
 sudo apt-get update
 MASTER
 
@@ -22,9 +23,10 @@ sudo apt-get install -y curl tree
 sudo mkdir -p /etc/apt/keyrings
 sudo curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | sudo tee /etc/apt/keyrings/salt-archive-keyring.pgp
 sudo curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources | sudo tee /etc/apt/sources.list.d/salt.sources
+sudo apt-get update
 sudo apt-get install -y salt-minion
 echo -e 'master: 192.168.88.101' |sudo tee /etc/salt/minion
-sudo systemctl restart salt-minion.service
+sudo systemctl restart salt-minion
 sudo apt-get update
 MINION
 
