@@ -1,28 +1,47 @@
-install_frotz:
-  pkg.installed:
-    - name: frotz
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
-zork_zip_download:
-  file.managed:
-    - name: /tmp/zork_undiscovered.zip
-    - source: https://archive.org/download/Infocom_Z-Machine_TOSEC_2012_04_23/Infocom_Z-Machine_TOSEC_2012_04_23.zip/Infocom%20Z-Machine%20%5BTOSEC%5D%2FGames%2FZork%20-%20The%20Undiscovered%20Underground%20v16%20%281997%29%28Activision%29%5B970828%5D.zip
-    - makedirs: True
-    - skip_verify: True
+$master = <<-MASTER
+set -o verbose
+sudo apt-get update
+sudo apt-get install -y curl tree
+sudo mkdir -p /srv/salt
+sudo curl -o /srv/salt/init.sls https://raw.githubusercontent.com/BenjaminL32/Zork_in_salt/refs/heads/main/init.sls
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | sudo tee /etc/apt/keyrings/salt-archive-keyring.pgp
+sudo curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources | sudo tee /etc/apt/sources.list.d/salt.sources
+sudo apt-get install -y salt-master
+sudo systemctl restart salt-master.service
+sudo apt-get update
+MASTER
 
-zork_zip_extract:
-  archive.extracted:
-    - name: /home/vagrant/zork_undiscovered
-    - source: /tmp/zork_undiscovered.zip
-    - enforce_toplevel: False
+$minion = <<-MINION
+set -o verbose
+sudo apt-get update
+sudo apt-get install -y curl tree
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | sudo tee /etc/apt/keyrings/salt-archive-keyring.pgp
+sudo curl -fsSL https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources | sudo tee /etc/apt/sources.list.d/salt.sources
+sudo apt-get install -y salt-minion
+echo -e 'master: 192.168.88.101' |sudo tee /etc/salt/minion
+sudo systemctl restart salt-minion.service
+sudo apt-get update
+MINION
 
-play_zork_script:
-  file.managed:
-    - name: /home/vagrant/zork_undiscovered/play_zork.sh
-    - mode: '0755'
-    - user: vagrant
-    - group: vagrant
-    - contents: |
-        #!/bin/bash
-        frotz "/home/vagrant/zork_undiscovered/ZTUU.z5"
-    - require:
-      - archive: zork_zip_extract
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.box = "debian/bookworm64"
+
+	config.vm.define "master" do |master|
+		master.vm.hostname = "master"
+		master.vm.network "private_network", ip: "192.168.88.101"
+		master.vm.provision "shell", inline: $master
+	end
+
+	config.vm.define "gamer", primary: true do |gamer|
+		gamer.vm.hostname = "gamer"
+		gamer.vm.network "private_network", ip: "192.168.88.102"
+		gamer.vm.provision "shell", inline: $minion
+	 end
+end
