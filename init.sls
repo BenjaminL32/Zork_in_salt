@@ -23,6 +23,6 @@ play_zork_script:
     - group: vagrant
     - contents: |
         #!/bin/bash
-        frotz "/home/vagrant/zork_undiscovered/Zork - The Undiscovered Underground.z5"
+        frotz "/home/vagrant/zork_undiscovered/ZTOO.z5"
     - require:
       - archive: zork_zip_extract
